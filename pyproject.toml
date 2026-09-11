@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "bst-bev"
+version = "0.1.0"
+description = "Hierarchical spatial addressing for integrating local BEV perception with global HD maps."
+readme = "README.md"
+requires-python = ">=3.10"
+
+dependencies = [
+    "numpy",
+    "nuscenes-devkit",
+    "shapely",
+    "bst-id @ git+https://github.com/nagasawayuki/bst-id.git",
+]
+
+
+[project.optional-dependencies]
+dev = [
+    "jupyterlab",
+    "ipykernel",
+    "matplotlib",
+    "pandas",
+    "pytest",
+]
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["bst_bev*"]
