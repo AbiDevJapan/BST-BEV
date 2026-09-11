@@ -223,8 +223,8 @@ class BSTMapIndex:
         index_spacing_m: float = 1.0,
         adaptive_index_spacing: bool = False,
         sampling_fraction: float = 0.5,
-        max_query_samples: int = 1_000_000,
-        max_index_samples: int = 5_000_000,
+        max_query_samples: int = 7_000_000,
+        max_index_samples: int = 10_000_000,
     ):
         self.nusc_map = nusc_map
         self.location = location
