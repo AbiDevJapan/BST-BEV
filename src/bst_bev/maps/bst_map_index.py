@@ -709,6 +709,50 @@ class BSTMapIndex:
 
         return result.tokens
 
+    def query_cell_keys(
+        self,
+        cell_keys: set[CellKey],
+    ) -> set[MapPrimitive]:
+        """
+        Retrieve all map primitives stored in the supplied
+        BST cells.
+        """
+
+        self._ensure_built()
+
+        primitives = set()
+
+        for cell_key in cell_keys:
+            primitives.update(
+                self.index.get(
+                    cell_key,
+                    set(),
+                )
+            )
+
+        return primitives
+
+    def query_cell_tokens(
+        self,
+        cell_keys: set[CellKey],
+    ) -> set[tuple[str, str]]:
+        """
+        Retrieve primitive (layer, token) pairs from an
+        explicit set of BST cells.
+        """
+
+        primitives = self.query_cell_keys(
+            cell_keys
+        )
+
+        return {
+            (
+                primitive.layer,
+                primitive.token,
+            )
+            for primitive in primitives
+        }
+
     # ========================================================
     # Diagnostics
     # ========================================================
