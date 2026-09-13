@@ -14,6 +14,28 @@ from bst_bev.maps.bst_map_index import BSTSpatialEncoder
 
 CellKey = tuple[int, int]
 
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True, slots=True)
+class TileBounds:
+    x_min: int
+    x_max: int
+    y_min: int
+    y_max: int
+
+    @property
+    def width(self) -> int:
+        return self.x_max - self.x_min + 1
+
+    @property
+    def height(self) -> int:
+        return self.y_max - self.y_min + 1
+
+    @property
+    def cell_count(self) -> int:
+        return self.width * self.height
+
 
 @dataclass(frozen=True, slots=True)
 class FixedZoomCoverResult:
@@ -129,12 +151,50 @@ class FixedZoomRegionCover:
         *,
         radius: float = 30.0,
     ) -> FixedZoomCoverResult:
-        """
-        Return all fixed-zoom BST cells intersecting the
-        square patch centered at (center_x, center_y).
 
-        The four corners are converted into BST tile space,
-        then the entire integer tile rectangle is enumerated.
+        bounds = self.tile_bounds(
+            center_x=center_x,
+            center_y=center_y,
+            radius=radius,
+        )
+
+        cells = set()
+
+        for tile_x in range(
+            bounds.x_min,
+            bounds.x_max + 1,
+        ):
+            for tile_y in range(
+                bounds.y_min,
+                bounds.y_max + 1,
+            ):
+                cells.add(
+                    Cell.from_parts(
+                        x=(
+                            self.zoom,
+                            tile_x,
+                        ),
+                        y=(
+                            self.zoom,
+                            tile_y,
+                        ),
+                    )
+                )
+
+        return FixedZoomCoverResult(
+            cells=frozenset(cells)
+        )
+
+    def tile_bounds(
+        self,
+        center_x: float,
+        center_y: float,
+        *,
+        radius: float = 30.0,
+    ) -> TileBounds:
+        """
+        Return the exact fixed-zoom BST tile bounds covering
+        the axis-aligned square query region.
         """
 
         if radius <= 0:
@@ -176,35 +236,9 @@ class FixedZoomRegionCover:
             for _, tile_y in tile_corners
         ]
 
-        x_min = min(x_indices)
-        x_max = max(x_indices)
-
-        y_min = min(y_indices)
-        y_max = max(y_indices)
-
-        cells = set()
-
-        for tile_x in range(
-            x_min,
-            x_max + 1,
-        ):
-            for tile_y in range(
-                y_min,
-                y_max + 1,
-            ):
-                cells.add(
-                    Cell.from_parts(
-                        x=(
-                            self.zoom,
-                            tile_x,
-                        ),
-                        y=(
-                            self.zoom,
-                            tile_y,
-                        ),
-                    )
-                )
-
-        return FixedZoomCoverResult(
-            cells=frozenset(cells)
+        return TileBounds(
+            x_min=min(x_indices),
+            x_max=max(x_indices),
+            y_min=min(y_indices),
+            y_max=max(y_indices),
         )
